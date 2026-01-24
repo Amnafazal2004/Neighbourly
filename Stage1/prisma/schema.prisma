@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -9,19 +8,29 @@ datasource db {
 }
 
 model Profile {
-  id String @id @db.Uuid 
-  //Same UUID as auth.users.id
-  email String @unique
-  fullName String?
-  createdAt DateTime @default(now())
-  services   Services[] 
+  id        String     @id @db.Uuid
+  email     String     @unique
+  fullName  String?
+  createdAt DateTime   @default(now())
+  bookings  Bookings[]
+  services  Services[]
 }
 
 model Services {
-  id  String   @id @default(uuid())
-  title String
+  id          String     @id @default(uuid()) @db.Uuid
+  title       String
   description String
-  authorId  String   @db.Uuid
+  authorId    String     @db.Uuid
+  bookings    Bookings[]
+  author      Profile    @relation(fields: [authorId], references: [id])
+}
 
-  author Profile    @relation(fields: [authorId], references: [id]) 
+model Bookings {
+  id          String   @id @default(uuid()) @db.Uuid
+  serviceId   String   @db.Uuid
+  bookingDate DateTime
+  timeSlot    DateTime
+  authorId    String   @db.Uuid
+  author      Profile  @relation(fields: [authorId], references: [id])
+  service     Services @relation(fields: [serviceId], references: [id])
 }

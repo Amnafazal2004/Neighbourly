@@ -49,3 +49,8 @@ export type Profile = Prisma.ProfileModel
  * 
  */
 export type Services = Prisma.ServicesModel
+/**
+ * Model Bookings
+ * 
+ */
+export type Bookings = Prisma.BookingsModel

@@ -17,7 +17,8 @@ export async function POST(request: Request) {
         })
          return NextResponse.json({ success: true, message: "service added" })
   } catch (error) {
-    return NextResponse.json({ success: false });
+    // console.error("API failed:", error);
+    return NextResponse.json({ success: false, message: error });
   }
 }
 
