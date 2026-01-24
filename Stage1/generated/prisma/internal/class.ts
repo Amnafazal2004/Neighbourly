@@ -20,7 +20,7 @@ const config: runtime.GetPrismaClientConfig = {
   "clientVersion": "7.3.0",
   "engineVersion": "9d6ad21cbbceab97458517b147a6a09ff43aa735",
   "activeProvider": "postgresql",
-  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Profile {\n  id        String     @id @db.Uuid\n  //Same UUID as auth.users.id\n  email     String     @unique\n  fullName  String?\n  createdAt DateTime   @default(now())\n  services  Services[]\n}\n\nmodel Services {\n  id          String @id @default(uuid())\n  title       String\n  description String\n  authorId    String @db.Uuid\n\n  author Profile @relation(fields: [authorId], references: [id])\n}\n",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Profile {\n  id        String   @id @db.Uuid // Same UUID as auth.users.id \n  email     String   @unique\n  fullName  String?\n  createdAt DateTime @default(now())\n\n  services Services[]\n  bookings Bookings[]\n}\n\nmodel Services {\n  id          String @id @default(uuid()) @db.Uuid\n  title       String\n  description String\n  authorId    String @db.Uuid\n\n  author Profile @relation(fields: [authorId], references: [id])\n\n  bookings Bookings[]\n}\n\nmodel Bookings {\n  id          String   @id @default(uuid()) @db.Uuid\n  serviceId   String   @db.Uuid\n  bookingDate DateTime\n  timeSlot    DateTime\n  authorId    String   @db.Uuid\n\n  author  Profile  @relation(fields: [authorId], references: [id])\n  service Services @relation(fields: [serviceId], references: [id])\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
@@ -28,7 +28,7 @@ const config: runtime.GetPrismaClientConfig = {
   }
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Profile\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fullName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"services\",\"kind\":\"object\",\"type\":\"Services\",\"relationName\":\"ProfileToServices\"}],\"dbName\":null},\"Services\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"authorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"object\",\"type\":\"Profile\",\"relationName\":\"ProfileToServices\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Profile\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fullName\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"services\",\"kind\":\"object\",\"type\":\"Services\",\"relationName\":\"ProfileToServices\"},{\"name\":\"bookings\",\"kind\":\"object\",\"type\":\"Bookings\",\"relationName\":\"BookingsToProfile\"}],\"dbName\":null},\"Services\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"authorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"object\",\"type\":\"Profile\",\"relationName\":\"ProfileToServices\"},{\"name\":\"bookings\",\"kind\":\"object\",\"type\":\"Bookings\",\"relationName\":\"BookingsToServices\"}],\"dbName\":null},\"Bookings\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"serviceId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bookingDate\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"timeSlot\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"authorId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"author\",\"kind\":\"object\",\"type\":\"Profile\",\"relationName\":\"BookingsToProfile\"},{\"name\":\"service\",\"kind\":\"object\",\"type\":\"Services\",\"relationName\":\"BookingsToServices\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
   const { Buffer } = await import('node:buffer')
@@ -195,6 +195,16 @@ export interface PrismaClient<
     * ```
     */
   get services(): Prisma.ServicesDelegate<ExtArgs, { omit: OmitOpts }>;
+
+  /**
+   * `prisma.bookings`: Exposes CRUD operations for the **Bookings** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Bookings
+    * const bookings = await prisma.bookings.findMany()
+    * ```
+    */
+  get bookings(): Prisma.BookingsDelegate<ExtArgs, { omit: OmitOpts }>;
 }
 
 export function getPrismaClientClass(): PrismaClientConstructor {
