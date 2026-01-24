@@ -8,8 +8,20 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+model Profile {
+  id String @id @db.Uuid 
+  //Same UUID as auth.users.id
+  email String @unique
+  fullName String?
+  createdAt DateTime @default(now())
+  services   Services[] 
+}
+
+model Services {
+  id  String   @id @default(uuid())
+  title String
+  description String
+  authorId  String   @db.Uuid
+
+  author Profile    @relation(fields: [authorId], references: [id]) 
 }
