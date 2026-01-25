@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
-  console.log("Api route hit");
   try {
     const formData = await request.formData();
     const serviceId = formData.get("serviceId") as string;
@@ -10,52 +9,60 @@ export async function POST(request: Request) {
     const timeSlot = formData.get("timeSlot") as string;
     const authorId = formData.get("authorId") as string;
 
-    // Check if user is trying to book their own service
+    // Check if user is booking their own service
     const service = await prisma.services.findUnique({
       where: { id: serviceId },
       select: { authorId: true }
     });
 
     if (!service) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "Service not found" 
-      });
+      return NextResponse.json({ success: false, message: "Service not found" });
     }
 
     if (service.authorId === authorId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: "You cannot book your own service" 
-      });
+      return NextResponse.json({ success: false, message: "You cannot book your own service" });
     }
 
     await prisma.bookings.create({
       data: {
-        serviceId: serviceId,
+        serviceId,
         bookingDate: new Date(bookingDate),
-        timeSlot: timeSlot,
-        authorId: authorId
+        timeSlot,
+        authorId
       }
     });
 
-    return NextResponse.json({ success: true, message: "booking added" });
+    return NextResponse.json({ success: true, message: "Booking added" });
   } catch (error) {
-    return NextResponse.json({ success: false });
+    console.error(error);
+    return NextResponse.json({ success: false, message: "Failed to create booking" });
   }
 }
 
 export async function GET(request: Request) {
   try {
-    const bookings = await prisma.bookings.findMany({
-      include: {
-        service: true,
-        author: true
-      }
-    });
-    return NextResponse.json({ success: true, bookings });
+    const url = new URL(request.url);
+    const serviceId = url.searchParams.get("serviceId");
+
+    let bookings;
+
+    if (serviceId) {
+      // Return bookings for a specific service
+      bookings = await prisma.bookings.findMany({
+        where: { serviceId },
+        include: { service: true, author: true },
+      });
+    } else {
+      // Return all bookings
+      bookings = await prisma.bookings.findMany({
+        include: { service: true, author: true },
+      });
+    }
+
+    return NextResponse.json(bookings); // returns array directly
   } catch (error) {
-    return NextResponse.json({ success: false });
+    console.error(error);
+    return NextResponse.json([]);
   }
 }
 
@@ -67,16 +74,17 @@ export async function PUT(request: Request) {
     const timeSlot = formData.get("timeSlot") as string;
 
     await prisma.bookings.update({
-      where: { id: id },
+      where: { id },
       data: {
         bookingDate: new Date(bookingDate),
-        timeSlot: timeSlot
+        timeSlot
       }
     });
 
-    return NextResponse.json({ success: true, message: "booking updated" });
+    return NextResponse.json({ success: true, message: "Booking updated" });
   } catch (error) {
-    return NextResponse.json({ success: false });
+    console.error(error);
+    return NextResponse.json({ success: false, message: "Failed to update booking" });
   }
 }
 
@@ -86,17 +94,12 @@ export async function DELETE(request: Request) {
     const id = formData.get("id") as string;
 
     await prisma.bookings.delete({
-      where: { id: id }
+      where: { id }
     });
 
-    return NextResponse.json({ success: true, message: "booking deleted" });
+    return NextResponse.json({ success: true, message: "Booking deleted" });
   } catch (error) {
-    return NextResponse.json({ success: false });
+    console.error(error);
+    return NextResponse.json({ success: false, message: "Failed to delete booking" });
   }
 }
-
-
-// POST: Creates a booking with validation to prevent users from booking their own services
-// GET: Retrieves all bookings with related service and author data
-// PUT: Updates booking date and time slot
-// DELETE: Removes a booking by ID
