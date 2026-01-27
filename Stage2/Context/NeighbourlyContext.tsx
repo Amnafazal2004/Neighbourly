@@ -10,6 +10,10 @@ import React, {
 type NeighbourContextType = {
   showlogin: boolean;
   setshowlogin: React.Dispatch<React.SetStateAction<boolean>>;
+  signup: boolean;
+  setsignup: React.Dispatch<React.SetStateAction<boolean>>;
+  signin: boolean;
+  setsignin: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const NeighbourlyContext = createContext<NeighbourContextType | undefined>(
@@ -34,12 +38,19 @@ type ProviderProps = {
 
 const NeighbourContextProvider = ({ children }: ProviderProps) => {
   const [showlogin, setshowlogin] = useState<boolean>(false);
+      const [signup, setsignup] = useState<boolean>(false);
+  
+    const [signin, setsignin] = useState<boolean>(true);
 
   return (
     <NeighbourlyContext.Provider
       value={{
         showlogin,
         setshowlogin,
+        signup,
+        setsignup,
+        signin,
+        setsignin,
       }}
     >
       {children}

@@ -4,18 +4,16 @@ import axios from "axios";
 import { useUserContext } from "@/Context/UserContext";
 import Footer from "@/features/Footer";
 import { useParams } from "next/navigation";
+import { toast } from "sonner";
 
 const BookingTest = () => {
-  const { serviceId } = useParams(); // from URL like /bookservices/[serviceId]
   const user = useUserContext();
   
-  const [bookings, setBookings] = useState<any[]>([]);
   const [bookingDate, setBookingDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
-  const [bookingId, setBookingId] = useState("");
 
   const authorId = user?.id || "";
-     const params = useParams();
+  const params = useParams();
 // params.id might be string | string[] | undefined
    const serviceid: string = Array.isArray(params.id) ? params.id[0] : params.id ?? "";
 
@@ -23,7 +21,7 @@ const BookingTest = () => {
   // Create booking
   const createBooking = async () => {
     if (!serviceid || !authorId) {
-      alert("Missing service ID or user ID!");
+      toast("Missing service ID or user ID!");
       return;
     }
 
@@ -37,11 +35,11 @@ const BookingTest = () => {
       const { data } = await axios.post("/api/Bookings", formData);
 
       if (data.success) {
-        alert("Booking created!");
+        toast("Booking created!");
         setBookingDate("");
         setTimeSlot("");
       } else {
-        alert(data.message);
+        toast(data.message);
       }
     } catch (err) {
       console.error(err);

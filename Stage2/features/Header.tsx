@@ -1,10 +1,15 @@
 "use client"
 
 import { useNeighbourContext } from "@/Context/NeighbourlyContext";
-import Login from "./Login";
+import { useSession } from "@/lib/auth-client";
+import React, { useEffect, useState } from "react";
+import Signout from "./SignOut";
+import Signin from "./Signin";
+import Signup from "./Signup";
 
 export default function NeighbourlyHeader() {
-  const {showlogin, setshowlogin} = useNeighbourContext()
+  const {showlogin, setshowlogin, signin} = useNeighbourContext()
+  const { data: session } = useSession();
 
   return (
     <>
@@ -28,14 +33,34 @@ export default function NeighbourlyHeader() {
 
             {/* CTA Buttons */}
         <div className="flex items-center gap-4">
+           {session?.user ? (
+            <Signout />
+          ) : (
+            <>
+              <button
+                onClick={() => setshowlogin(true)}
+                 className="px-5 py-2 border-2 border-black rounded-full text-sm font-semibold hover:bg-black hover:text-white transition"
+              >
+                Login
+              </button>
+            </>
+          )}
        
-        {showlogin?
+        {/* {showlogin?
         <div>
           <Login></Login>
         </div> : <button onClick={()=> showlogin?setshowlogin(false): setshowlogin(true) } className="px-5 py-2 border-2 border-black rounded-full text-sm font-semibold hover:bg-black hover:text-white transition">
           Sign in
         </button>
-        }
+        } */}
+
+        {showlogin ? (
+  <div className="fixed inset-0 z-50 bg-[#00000090] flex items-center justify-center">
+    <div className="relative">
+      {signin ? <Signin /> : <Signup />}
+    </div>
+  </div>
+) : null}
        
           <button className="p-2 hover:opacity-70 transition">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

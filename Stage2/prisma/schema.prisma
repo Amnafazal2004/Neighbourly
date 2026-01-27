@@ -1,5 +1,5 @@
- generator client {
-  provider = "prisma-client"
+generator client {
+  provider = "prisma-client-js"
   output   = "../generated/prisma"
 }
 
@@ -8,17 +8,28 @@ datasource db {
 }
 
 enum Role {
-  COMMUNITY_MEMBER
-  MODERATOR
+  admin
+  provider
+  seeker
 }
-model Profile {
-  id        String     @id @db.Uuid
+
+model User {
+  id        String     @id @default(uuid()) @db.Uuid
   email     String     @unique
-  fullName  String?
-  role      Role       @default(COMMUNITY_MEMBER)
+  name      String
+  password  String
+  role      Role       @default(seeker)
   createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   bookings  Bookings[]
   services  Services[]
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  expires   DateTime
+  createdAt DateTime @default(now())
 }
 
 model Services {
@@ -30,7 +41,7 @@ model Services {
   price       Int
   authorId    String     @db.Uuid
   bookings    Bookings[]
-  author      Profile    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author      User       @relation(fields: [authorId], references: [id])
 }
 
 model Bookings {
@@ -39,6 +50,6 @@ model Bookings {
   bookingDate DateTime
   timeSlot    String
   authorId    String   @db.Uuid
-  author      Profile  @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  service     Services @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id])
+  service     Services @relation(fields: [serviceId], references: [id])
 }

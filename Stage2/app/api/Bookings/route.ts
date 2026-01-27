@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     if (service.authorId === authorId) {
       console.log("User tried to book their own service");
-      return NextResponse.json({ success: false, message: "You cannot book your own service" }, { status: 400 });
+      return NextResponse.json({ success: false, message: "You cannot book your own service" });
     }
 
     const booking = await prisma.bookings.create({
